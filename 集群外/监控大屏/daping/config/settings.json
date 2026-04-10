@@ -1,0 +1,13 @@
+{
+  "screen": {
+    "title": "夜莺监控告警大屏",
+    "refreshIntervalMs": 5000,
+    "maxItems": 100
+  },
+  "sound": {
+    "enabled": true,
+    "critical": "/static/audio/critical.mp3",
+    "warning": "/static/audio/warning.mp3",
+    "info": "/static/audio/info.mp3"
+  }
+}

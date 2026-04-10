@@ -1,0 +1,1 @@
+docker compose up -d  直接运行即可

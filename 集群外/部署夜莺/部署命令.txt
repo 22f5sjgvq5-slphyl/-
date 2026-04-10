@@ -1,0 +1,7 @@
+cd /root
+git clone https://github.com/ccfos/nightingale.git
+cd nightingale/docker/compose-bridge
+
+docker compose up -d
+部署完成访问17000端口
+账号是root 密码是root.2020

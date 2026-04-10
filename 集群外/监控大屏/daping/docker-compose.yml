@@ -1,0 +1,15 @@
+services:
+  alert-screen:
+    build: .
+    container_name: daping-alert-screen
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      APP_TOKEN: "change-me"
+      APP_DB_PATH: "/app/data/alerts.db"
+      APP_CONFIG_PATH: "/app/config/settings.json"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./static/audio:/app/static/audio

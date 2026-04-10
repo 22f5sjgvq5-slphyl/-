@@ -1,0 +1,72 @@
+# ==========================================
+# 1. Prometheus 核心配置
+# ==========================================
+prometheus:
+  prometheusSpec:
+    # --- 关键配置：远程写入 VictoriaMetrics ---
+    remoteWrite:
+      - url: "http://10.0.0.100:8428/api/v1/write"
+        # 可选：如果 mg100 有认证，在这里配置
+        # basicAuth:
+        #   username: 
+        #   password: 
+        
+        # 优化写入性能的配置 (防止积压)
+        queueConfig:
+          capacity: 10000       # 队列容量
+          maxShards: 200        # 最大并发分片
+          maxSamplesPerSend: 5000 # 每次发送的最大样本数
+          batchSendDeadline: 5s   # 批量发送超时时间
+    
+    # --- 资源限制 (根据你集群情况调整) ---
+    resources:
+      requests:
+        memory: 500Mi
+        cpu: 250m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+    
+    # --- 数据保留时间 (因为数据都推走了，本地可以少存点) ---
+    retention: 2h 
+    
+    # --- 存储配置 (如果不需要本地持久化，可以注释掉整个 storageSpec) ---
+    # 这里给一个小的存储以防重启丢失最近数据，或者完全注释掉使用 emptyDir
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    
+    # --- 监控 K8s 内部组件 ---
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+# ==========================================
+# 2. 关闭 Alertmanager (不需要告警管理)
+# ==========================================
+alertmanager:
+  enabled: false
+
+# ==========================================
+# 3. 关闭 Grafana (你用 VictoriaMetrics 自带的或单独的)
+# ==========================================
+grafana:
+  enabled: false
+
+# ==========================================
+# 4. Node Exporter (采集宿主机指标)
+# ==========================================
+prometheus-node-exporter:
+  enabled: true
+  # 如果节点有特殊的标签选择器，可以在这里配
+  # affinity: ...
+
+# ==========================================
+# 5. Kube State Metrics (采集 K8s 对象指标)
+# ==========================================
+kube-state-metrics:
+  enabled: true

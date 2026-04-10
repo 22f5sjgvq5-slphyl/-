@@ -1,0 +1,69 @@
+version: '3.8'
+
+# 定义一个独立的网络，确保内部服务互通
+networks:
+  n9e-network:
+    driver: bridge
+
+services:
+  # 1. MySQL: 存储夜莺的配置、用户、告警规则等元数据
+  mysql:
+    image: mysql:8.0
+    container_name: n9e-mysql
+    hostname: mysql
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: n9e
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    volumes:
+      - ./mysqldata:/var/lib/mysql
+      # 确保 ../initsql 目录下有 n9e.sql 初始化脚本
+      - ../initsql:/docker-entrypoint-initdb.d/
+      - ./etc-mysql/my.cnf:/etc/my.cnf
+    networks:
+      - n9e-network
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+
+  # 2. Redis: 存储缓存、会话、临时数据
+  redis:
+    image: redis:6.2-alpine
+    container_name: n9e-redis
+    hostname: redis
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+    networks:
+      - n9e-network
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+
+  # 3. Nightingale: 核心 Web 服务
+  nightingale:
+    image: flashcatcloud/nightingale:latest
+    container_name: n9e-server
+    hostname: nightingale
+    restart: always
+    environment:
+      GIN_MODE: release
+      TZ: Asia/Shanghai
+      # 等待 MySQL 和 Redis 启动后再启动夜莺
+      WAIT_HOSTS: mysql:3306,redis:6379
+      WAIT_TIMEOUT: 30
+    volumes:
+      - ./etc-nightingale:/app/etc
+    networks:
+      - n9e-network
+    ports:
+      - "17000:17000"  # Web 界面端口
+      - "20090:20090"  # 数据接收端口 (虽然你主要用拉取模式，但保留以防万一)
+    depends_on:
+      - mysql
+      - redis
+    command:
+      - /app/n9e

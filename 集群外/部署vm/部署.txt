@@ -1,0 +1,11 @@
+
+mkdir   /data/vm-data
+chmod  777    /data/vm-data
+docker run -d --name vm \
+  --restart=always \
+  -p 8428:8428 \
+  -v /data/vm-data:/vm-data \
+  victoriametrics/victoria-metrics:latest \
+  -retentionPeriod=3 \
+  -storageDataPath=/vm-data \
+  -httpListenAddr=:8428

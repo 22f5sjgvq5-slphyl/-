@@ -1,0 +1,776 @@
+[
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "API Server 队列积压 (饱和度)",
+    "note": "API Server 当前并发请求数超过 400 (当前 {{ $value }})，系统负载过高。",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "max(apiserver_current_inflight_requests{}) > 0",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "Etcd 延迟过高 (数据库瓶颈)",
+    "note": "`Etcd P99 写入延迟超过 100ms (当前 {{ $value",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "histogram_quantile(0.99, sum(rate(etcd_disk_backend_commit_duration_seconds_bucket[5m])) by (le)) > 0.1",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "K8s API Server 请求错误率过高",
+    "note": "`API Server 过去 5 分钟内的 5xx 错误率高达 {{ $value",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "sum(rate(apiserver_request_total{job=\"apiserver\",code=~\"5..\"}[5m])) / sum(rate(apiserver_request_total{job=\"apiserver\"}[5m])) * 100 > 1",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=api"
+    ],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "K8s CoreDNS 解析错误率高",
+    "note": "",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "sum(rate(coredns_dns_responses_total{rcode=\"SERVFAIL\"}[5m])) / sum(rate(coredns_dns_responses_total[5m])) * 100 > 0",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "K8s 节点 CPU 使用率过高",
+    "note": "",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 300,
+    "rule_config": {
+      "inhibit": false,
+      "queries": [
+        {
+          "prom_ql": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100) > 80",
+          "recover_config": {
+            "judge_type": 0,
+            "recover_exp": ""
+          },
+          "severity": 2,
+          "unit": "",
+          "var_config": {
+            "child_var_configs": null,
+            "param_val": null
+          },
+          "var_enabled": false
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=node"
+    ],
+    "annotations": {
+      "description": "当前值：{{ $value }}%",
+      "summary": "告警：{{ $labels.node }} CPU 使用率过高"
+    },
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "K8s 节点内存使用率过高",
+    "note": "",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 300,
+    "rule_config": {
+      "inhibit": false,
+      "queries": [
+        {
+          "prom_ql": "(1 - (avg by (instance) (node_memory_MemAvailable_bytes) / avg by (instance) (node_memory_MemTotal_bytes))) * 100 > 80",
+          "recover_config": {
+            "judge_type": 0,
+            "recover_exp": ""
+          },
+          "severity": 2,
+          "unit": "",
+          "var_config": {
+            "child_var_configs": null,
+            "param_val": null
+          },
+          "var_enabled": false
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=node"
+    ],
+    "annotations": {
+      "description": "当前值：{{ $value }}%",
+      "summary": "告警：{{ $labels.node }} 内存使用率过高"
+    },
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "K8s 节点根磁盘空间不足",
+    "note": "",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 300,
+    "rule_config": {
+      "inhibit": false,
+      "queries": [
+        {
+          "prom_ql": "(1 - (avg by (instance, mountpoint) (node_filesystem_avail_bytes{mountpoint=\"/\"}) / avg by (instance, mountpoint) (node_filesystem_size_bytes{mountpoint=\"/\"}))) * 100 > 80",
+          "recover_config": {
+            "judge_type": 0,
+            "recover_exp": ""
+          },
+          "severity": 2,
+          "unit": "",
+          "var_config": {
+            "child_var_configs": null,
+            "param_val": null
+          },
+          "var_enabled": false
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=node"
+    ],
+    "annotations": {
+      "description": "当前剩余空间：{{ $value }}%",
+      "summary": "告警：{{ $labels.node }} 磁盘空间不足"
+    },
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "K8s 节点状态异常 (NotReady)",
+    "note": "",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "inhibit": false,
+      "queries": [
+        {
+          "prom_ql": "kube_node_status_condition{condition=\"Ready\", status=\"true\"} == 0",
+          "recover_config": {
+            "judge_type": 0,
+            "recover_exp": ""
+          },
+          "severity": 1,
+          "unit": "",
+          "var_config": {
+            "child_var_configs": null,
+            "param_val": null
+          },
+          "var_enabled": false
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=node"
+    ],
+    "annotations": {
+      "description": "该节点已处于 NotReady 状态超过 1 分钟。",
+      "summary": "严重：{{ $labels.node }} 节点不可用"
+    },
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "Pod 内存使用率过高 (接近 OOM)",
+    "note": "检测内存使用超过限制值的 90%，预防被 K8s OOM Kill",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "(sum by (namespace, pod, container) (container_memory_working_set_bytes{image!=\"\"}) / sum by (namespace, pod, container) (kube_pod_container_resource_limits{resource=\"memory\"})) * 100 > 90",
+          "severity": 1
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=pod"
+    ],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "Pod 无网络流量 (疑似假死)",
+    "note": "检测接收或发送流量为 0，可能应用进程卡死但未被杀掉。",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "sum by (namespace, pod) (rate(container_network_receive_bytes_total{namespace!=\"kube-system\", image!=\"\"}[5m])) == 0 and sum by (namespace, pod) (rate(container_network_transmit_bytes_total{namespace!=\"kube-system\", image!=\"\"}[5m])) == 0",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "Pod 磁盘写入错误 (可选)",
+    "note": "如果节点开启了相关监控，检测容器层写入错误。",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "increase(container_fs_writes_failed_total{image!=\"\"}[5m]) > 0",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "loki",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          4
+        ]
+      }
+    ],
+    "name": "审判系统连接数据库失败",
+    "note": "针对您的具体业务，比如数据库连接失败、超时等。",
+    "prod": "logging",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "sum(count_over_time({app=\"my-java-app\"} |= \"Connection refused\"[5m])) by (pod) > 5",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "loki",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          4
+        ]
+      }
+    ],
+    "name": "日志量突增 (可能死循环打印)",
+    "note": "",
+    "prod": "logging",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "sum(rate({namespace!=\"kube-system\", container!=\"\"}[5m])) by (namespace, pod, container) > 1000",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=loki"
+    ],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "loki",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          4
+        ]
+      }
+    ],
+    "name": "检测 OOMKilled 事件 (通过日志)",
+    "note": "检测到节点或容器发生内存溢出 (OOMKilled)，请检查内存限制。",
+    "prod": "logging",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "count_over_time({job=\"kubelet\"} |~ \"OOMKilled\"[10m]) > 0",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=loki"
+    ],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "loki",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          4
+        ]
+      }
+    ],
+    "name": "检测应用错误日志 (Error/Exception)",
+    "note": "统计包含 \"ERROR\", \"Exception\", \"Panic\" 等关键词的日志数量。",
+    "prod": "logging",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "sum(count_over_time({namespace=\"siam-cloud\"} |= \"error\"[5m])) by (pod, container)",
+          "severity": 1
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=loko"
+    ],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 2,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  },
+  {
+    "cate": "prometheus",
+    "datasource_queries": [
+      {
+        "match_type": 0,
+        "op": "in",
+        "values": [
+          2
+        ]
+      }
+    ],
+    "name": "节点时间不同步 (Time Skew)",
+    "note": "节点时间与 Prometheus 服务器时间偏差超过 10 秒",
+    "prod": "metric",
+    "delay": 0,
+    "prom_for_duration": 60,
+    "rule_config": {
+      "queries": [
+        {
+          "prom_ql": "abs(node_time_seconds - time()) > 30",
+          "severity": 2
+        }
+      ]
+    },
+    "event_relabel_config": null,
+    "prom_eval_interval": 15,
+    "enable_in_bg": 0,
+    "notify_recovered": 1,
+    "notify_repeat_step": 60,
+    "notify_max_number": 0,
+    "recover_duration": 0,
+    "callbacks": [],
+    "append_tags": [
+      "app=node"
+    ],
+    "annotations": {},
+    "uuid": 0,
+    "cur_event_count": 0,
+    "update_by_nickname": "超管",
+    "cron_pattern": "@every 60s",
+    "notify_rule_ids": [
+      1
+    ],
+    "pipeline_configs": null,
+    "notify_version": 1
+  }
+]

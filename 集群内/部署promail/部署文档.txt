@@ -1,0 +1,3 @@
+解压
+cd /opt/loki/helm-charts-promtail-6.17.1
+helm install promtail ./charts/promtail -n logging -f my-values.yaml --create-namespace

@@ -1,0 +1,4 @@
+helm install k8s-monitor ./charts/kube-prometheus-stack-*.tgz \
+  -f values.yaml \
+  -n yeyin \
+  --create-namespace

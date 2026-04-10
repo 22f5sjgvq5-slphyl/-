@@ -1,0 +1,70 @@
+配置文件
+cat > loki-config.yaml << 'EOF'
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /tmp/loki
+  storage:
+    filesystem:
+      chunks_directory: /tmp/loki/chunks
+      rules_directory: /tmp/loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# 【可选】防止磁盘爆满，设置保留时间 (例如保留 7 天)
+# compactor:
+#   working_directory: /tmp/loki/compactor
+#   shared_store: filesystem
+# limits_config:
+#   retention_period: 168h 
+EOF
+
+docker-conpose
+
+
+version: "3.8"
+
+services:
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      # 【重要】将数据挂载到宿主机目录，防止容器删除后数据丢失
+      - /data/loki:/tmp/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    # 如果宿主机内存紧张，可以限制容器内存
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2G
+
+mkdir -p /data/loki
+docker-compose up -d

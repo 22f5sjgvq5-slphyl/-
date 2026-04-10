@@ -1,0 +1,50 @@
+# my-values.yaml
+config:
+  # 禁用自动生成的默认客户端配置，使用自定义地址
+  clients:
+    - url: http://10.0.0.100:3100/loki/api/v1/push
+      tenant_id: default
+  
+  # 【关键】开启宿主机根文件系统挂载，并设置双向传播，确保能读取 /var/log/pods
+  hostRootFsMount:
+    enabled: true
+    mountPropagation: Bidirectional
+
+  snippets:
+    scrapeConfigs: |
+      # 使用静态配置扫描所有 Pod 日志
+      - job_name: kubernetes-pods-static
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: varlogs
+              __path__: /var/log/pods/*/*/*.log
+        
+        pipeline_stages:
+          - cri: {} # 自动处理容器运行时日志格式 (CRI)
+        
+        relabel_configs:
+          # 从路径提取 Namespace (格式: /var/log/pods/<ns>_<pod>_<uid>/<container>/...)
+          - source_labels: [__path__]
+            regex: '/var/log/pods/([^_]+)_([^_]+)_([^/]+)/([^/]+)/[^/]+\.log'
+            replacement: '${1}'
+            target_label: namespace
+          
+          # 从路径提取 Pod Name
+          - source_labels: [__path__]
+            regex: '/var/log/pods/([^_]+)_([^_]+)_([^/]+)/([^/]+)/[^/]+\.log'
+            replacement: '${2}'
+            target_label: pod
+          
+          # 从路径提取 Container Name
+          - source_labels: [__path__]
+            regex: '/var/log/pods/([^_]+)_([^_]+)_([^/]+)/([^/]+)/[^/]+\.log'
+            replacement: '${4}'
+            target_label: container
+            
+          # 提取流名称 (通常用 container 名)
+          - source_labels: [__path__]
+            regex: '/var/log/pods/([^_]+)_([^_]+)_([^/]+)/([^/]+)/[^/]+\.log'
+            replacement: '${4}'
+            target_label: stream

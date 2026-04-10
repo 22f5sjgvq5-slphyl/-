@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>夜莺监控告警大屏</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div>
+        <p class="sub">NIGHTINGALE ALERT SCREEN</p>
+        <h1 id="screen-title">夜莺监控告警大屏</h1>
+      </div>
+      <div class="header-right">
+        <div class="box"><span>当前时间</span><strong id="clock">--</strong></div>
+        <div class="box"><span>最新刷新</span><strong id="last-refresh">--</strong></div>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="card critical"><span>Critical</span><strong id="critical-count">0</strong></div>
+      <div class="card warning"><span>Warning</span><strong id="warning-count">0</strong></div>
+      <div class="card info"><span>Info</span><strong id="info-count">0</strong></div>
+      <div class="card total"><span>总数</span><strong id="total-count">0</strong></div>
+    </section>
+
+    <section class="toolbar">
+      <div class="filters">
+        <select id="severity-filter">
+          <option value="all">全部级别</option>
+          <option value="critical">Critical</option>
+          <option value="warning">Warning</option>
+          <option value="info">Info</option>
+        </select>
+        <select id="status-filter">
+          <option value="all">全部状态</option>
+          <option value="firing">触发中</option>
+          <option value="processing">处理中</option>
+          <option value="recovered">已恢复</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button id="sound-toggle">声音：开启</button>
+        <button id="refresh-btn">立即刷新</button>
+      </div>
+    </section>
+
+    <section class="main">
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>级别</th>
+              <th>状态</th>
+              <th>告警名称</th>
+              <th>监控对象</th>
+              <th>触发时间</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="alerts-body">
+            <tr><td colspan="7" class="empty">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel side">
+        <h3>最近动态</h3>
+        <div id="feed-list"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="mask" id="mask"></div>
+    <div class="modal-content">
+      <button class="close" id="close-btn">×</button>
+      <h3 id="detail-title">告警详情</h3>
+      <p><b>状态：</b><span id="detail-status"></span></p>
+      <p><b>级别：</b><span id="detail-severity"></span></p>
+      <p><b>对象：</b><span id="detail-target"></span></p>
+      <p><b>内容：</b><span id="detail-content"></span></p>
+      <h4>标签</h4>
+      <pre id="detail-tags"></pre>
+      <h4>指标</h4>
+      <pre id="detail-metrics"></pre>
+      <h4>原始请求</h4>
+      <pre id="detail-raw"></pre>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
